@@ -29,8 +29,6 @@ jobs:
             native/src/*.c \
             rnnoise_src/src/denoise.c \
             rnnoise_src/src/rnn.c \
-            rnnoise_src/src/rnn_data.c \
-            rnnoise_src/src/rnn_reader.c \
             rnnoise_src/src/rnnoise_data.c \
             rnnoise_src/src/rnnoise_tables.c \
             rnnoise_src/src/nnet.c \
