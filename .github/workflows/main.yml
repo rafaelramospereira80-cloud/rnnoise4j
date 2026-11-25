@@ -5,13 +5,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: xiph/rnnoise
+          path: rnnoise_src
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
       - name: Compile librnnoise.so with Android NDK
         run: |
-          git clone --depth 1 https://xiph.org rnnoise_src || git clone --depth 1 https://github.com rnnoise_src
           mkdir -p out
           CC="$ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android24-clang"
           $CC -shared -fPIC -O3 \
