@@ -15,12 +15,22 @@ jobs:
           java-version: '21'
       - name: Compile librnnoise.so with Android NDK
         run: |
+          sudo apt-get update && sudo apt-get install -y autoconf automake libtool
+          export TOOLCHAIN="$ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/linux-x86_64"
+          export CC="$TOOLCHAIN/bin/aarch64-linux-android24-clang"
+          export AR="$TOOLCHAIN/bin/llvm-ar"
+          export RANLIB="$TOOLCHAIN/bin/llvm-ranlib"
+          export STRIP="$TOOLCHAIN/bin/llvm-strip"
+          cd rnnoise_src
+          ./autogen.sh
+          ./configure --host=aarch64-linux-android --disable-examples --disable-doc
+          make -j4
+          cd ..
           mkdir -p out
-          CC="$ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android24-clang"
           $CC -shared -fPIC -O3 \
             -I"$JAVA_HOME/include" -I"$JAVA_HOME/include/linux" \
-            -Inative/src -Irnnoise_src/include -Irnnoise_src/src \
-            $(find native/src rnnoise_src/src -name "*.c" ! -name "*example*" ! -name "*dump*" ! -name "*test*" ! -name "*train*" ! -name "*nnet_data*") \
+            -Inative/src -Irnnoise_src/include \
+            native/src/*.c rnnoise_src/.libs/librnnoise.a \
             -o out/librnnoise.so -lm
       - uses: actions/upload-artifact@v4
         with:
