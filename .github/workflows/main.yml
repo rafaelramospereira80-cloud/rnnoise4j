@@ -5,16 +5,22 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          submodules: recursive
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
           java-version: '21'
-      - uses: goto-bus-stop/setup-zig@v2
-        with:
-          version: 0.14.1
-      - run: sudo apt-get update && sudo apt-get install -y ninja-build
-      - run: ./gradlew build
+      - run: sudo snap install zig --classic --beta
+      - name: Compile librnnoise.so for Android ARM64
+        run: |
+          mkdir -p out
+          zig cc -target aarch64-linux-android -shared -fPIC -O3 \
+            -I"$JAVA_HOME/include" -I"$JAVA_HOME/include/linux" \
+            -Isrc/main/c -Irnnoise/include -Irnnoise/src \
+            $(find src/main/c rnnoise/src -name "*.c" ! -name "*example*" ! -name "*dump*") \
+            -o out/librnnoise.so -lm
       - uses: actions/upload-artifact@v4
         with:
-          name: rnnoise-binaries
-          path: build/libs/*.jar
+          name: rnnoise-android-arm64
+          path: out/librnnoise.so
