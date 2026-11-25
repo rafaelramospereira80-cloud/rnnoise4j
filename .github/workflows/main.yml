@@ -8,7 +8,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           repository: xiph/rnnoise
-          ref: 7f449bf8bd3b933891d12c30112268c4090e4d59
           path: rnnoise_src
       - uses: actions/setup-java@v4
         with:
@@ -16,8 +15,14 @@ jobs:
           java-version: '21'
       - name: Compile librnnoise4j.so with Android NDK
         run: |
+          sudo apt-get update && sudo apt-get install -y autoconf automake libtool
+          export TOOLCHAIN="$ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/linux-x86_64"
+          export CC="$TOOLCHAIN/bin/aarch64-linux-android24-clang"
+          cd rnnoise_src
+          ./autogen.sh
+          ./configure --host=aarch64-linux-android --disable-examples --disable-doc
+          cd ..
           mkdir -p out
-          CC="$ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/linux-x86_64/bin/aarch64-linux-android24-clang"
           $CC -shared -fPIC -O3 -DRNNOISE_BUILD \
             -I"$JAVA_HOME/include" -I"$JAVA_HOME/include/linux" \
             -Inative/include -Inative/src -Irnnoise_src/include -Irnnoise_src/src \
@@ -26,6 +31,11 @@ jobs:
             rnnoise_src/src/rnn.c \
             rnnoise_src/src/rnn_data.c \
             rnnoise_src/src/rnn_reader.c \
+            rnnoise_src/src/rnnoise_data.c \
+            rnnoise_src/src/rnnoise_tables.c \
+            rnnoise_src/src/nnet.c \
+            rnnoise_src/src/nnet_default.c \
+            rnnoise_src/src/parse_lpcnet_weights.c \
             rnnoise_src/src/pitch.c \
             rnnoise_src/src/kiss_fft.c \
             rnnoise_src/src/celt_lpc.c \
