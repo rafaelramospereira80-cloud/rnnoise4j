@@ -29,7 +29,7 @@ jobs:
           mkdir -p out
           $CC -shared -fPIC -O3 \
             -I"$JAVA_HOME/include" -I"$JAVA_HOME/include/linux" \
-            -Inative/src -Irnnoise_src/include \
+            -Inative/include -Inative/src -Irnnoise_src/include \
             native/src/*.c rnnoise_src/.libs/librnnoise.a \
             -o out/librnnoise.so -lm
       - uses: actions/upload-artifact@v4
