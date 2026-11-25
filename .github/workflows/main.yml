@@ -13,7 +13,7 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
-      - name: Compile librnnoise4j.so with Android NDK
+      - name: Patch JNI wrapper and compile librnnoise4j.so
         run: |
           sudo apt-get update && sudo apt-get install -y autoconf automake libtool
           export TOOLCHAIN="$ANDROID_NDK_LATEST_HOME/toolchains/llvm/prebuilt/linux-x86_64"
@@ -24,6 +24,8 @@ jobs:
           sed -i '/USE_WEIGHTS_FILE/d' config.h
           sed -i '/ENABLE_X86_RTCD/d' config.h
           cd ..
+          sed -i 's/rnnoise_create(rnn_model)/rnnoise_create(NULL)/g' native/src/rnnoise.c
+          sed -i 's/if (rnn_model == NULL)/if (0)/g' native/src/rnnoise.c
           mkdir -p out
           $CC -shared -fPIC -O3 -DRNNOISE_BUILD -DHAVE_CONFIG_H \
             -I"$JAVA_HOME/include" -I"$JAVA_HOME/include/linux" \
