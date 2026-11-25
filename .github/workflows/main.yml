@@ -21,11 +21,13 @@ jobs:
           cd rnnoise_src
           ./autogen.sh
           ./configure --host=aarch64-linux-android --disable-examples --disable-doc
+          sed -i '/USE_WEIGHTS_FILE/d' config.h
+          sed -i '/ENABLE_X86_RTCD/d' config.h
           cd ..
           mkdir -p out
-          $CC -shared -fPIC -O3 -DRNNOISE_BUILD \
+          $CC -shared -fPIC -O3 -DRNNOISE_BUILD -DHAVE_CONFIG_H \
             -I"$JAVA_HOME/include" -I"$JAVA_HOME/include/linux" \
-            -Inative/include -Inative/src -Irnnoise_src/include -Irnnoise_src/src \
+            -Inative/include -Inative/src -Irnnoise_src -Irnnoise_src/include -Irnnoise_src/src \
             native/src/*.c \
             rnnoise_src/src/denoise.c \
             rnnoise_src/src/rnn.c \
