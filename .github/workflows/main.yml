@@ -11,14 +11,17 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
-      - run: sudo snap install zig --classic --beta
+      - uses: mlugg/setup-zig@v1
+        with:
+          version: 0.14.1
       - name: Compile librnnoise.so for Android ARM64
         run: |
           mkdir -p out
+          find . -maxdepth 4 -name "*.c"
           zig cc -target aarch64-linux-android -shared -fPIC -O3 \
             -I"$JAVA_HOME/include" -I"$JAVA_HOME/include/linux" \
-            -Isrc/main/c -Irnnoise/include -Irnnoise/src \
-            $(find src/main/c rnnoise/src -name "*.c" ! -name "*example*" ! -name "*dump*") \
+            $(find . -path "./.git" -prune -o -type d \( -name "include" -o -name "src" -o -name "c" \) -print | sed 's/^/-I/') \
+            $(find . -path "./.git" -prune -o -name "*.c" ! -name "*example*" ! -name "*dump*" ! -name "*test*" -print) \
             -o out/librnnoise.so -lm
       - uses: actions/upload-artifact@v4
         with:
